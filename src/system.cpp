@@ -17,12 +17,12 @@ using std::vector;
 // TODO: Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// TODO: Return a container composed of the system's processes
+// DONE: Return a container composed of the system's processes
 vector<Process>& System::Processes() {
     for (int pid : LinuxParser::Pids()) {
         processes_.emplace_back(pid);
     }
-    std::sort(processess_.begin(), processess_end());
+    std::sort(processes_.begin(), processes_.end());
     return processes_;
 }
 
