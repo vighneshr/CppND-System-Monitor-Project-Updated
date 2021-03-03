@@ -205,8 +205,7 @@ string LinuxParser::Ram(int pid) {
       if (line.find("VmSize:") != string::npos) {
         std::istringstream linestream(line);
         linestream >> key >> val;
-        float ram = stoi(val)/1024;
-        return to_string(ram);
+        return to_string(stoi(val)/1024);
       }
     }
   }
