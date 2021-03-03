@@ -18,9 +18,7 @@ string Format::ElapsedTime(long int time) {
   int hours = time / (60 * 60);
   int minutes = (time / 60) % 60;
   long seconds = time % 60;
-  //return to_String(hours) + ":" + 
   return std::string(Format::Pad(to_string(hours), '0') + ":" +
                      Format::Pad(to_string(minutes), '0') + ":" +
                      Format::Pad(to_string(seconds), '0'));
-  //return string();
 }

@@ -16,7 +16,7 @@ int Process::Pid() { return pid_; }
 
 // Done: Return this process's CPU utilization
 float Process::CpuUtilization() {
-    /* process uptime */
+    #if 0
     long int process_uptime = this->UpTime();
     string temp, line, utime, stime, cutime, cstime;
     std::ifstream filestream(LinuxParser::kProcDirectory + to_string(pid_) + LinuxParser::kStatFilename);
@@ -30,13 +30,22 @@ float Process::CpuUtilization() {
     long int total_time{stol(utime) + stol(stime) + stol(cutime) + stol(cstime)};
     
     return (total_time/process_uptime);
+    #else
+    procJiffies = LinuxParser::ActiveJiffies(Pid());
+    totalJiffies = LinuxParser::ActiveJiffies() + LinuxParser::IdleJiffies();
+    CPUUtil =
+      (float)(procJiffies - prevProcJiffies) / (totalJiffies - prevTotalJiffies);
+    prevTotalJiffies = totalJiffies;
+    prevProcJiffies = procJiffies;
+    return CPUUtil;    
+    #endif
 }
 
 // TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+string Process::Command() { return LinuxParser::Command(Pid()); }
 
 // TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+string Process::Ram() { return LinuxParser::Ram(Pid()); }
 
 // TODO: Return the user (name) that generated this process
 string Process::User() { return LinuxParser::User(Pid()); }
@@ -46,4 +55,6 @@ long int Process::UpTime() { return LinuxParser::UpTime(Pid()); }
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+bool Process::operator<(Process const& a) const { 
+    return CPUUtil > a.CPUUtil;
+}

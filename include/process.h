@@ -21,6 +21,12 @@ class Process {
   // TODO: Declare any necessary private members
  private:
  int pid_;
+ long procJiffies{0};
+ long totalJiffies{0};
+ long prevProcJiffies{0};
+ long prevTotalJiffies{0};
+ float CPUUtil{0};
+
 };
 
 #endif
