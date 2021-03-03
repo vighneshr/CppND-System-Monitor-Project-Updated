@@ -76,10 +76,10 @@ float LinuxParser::MemoryUtilization() {
     while (std::getline(stream, line)) {
       std::istringstream linestream(line);
       while (linestream >> key >> value){
-        if (key == "MemTotal") {
+        if (key == "MemTotal:") {
           MemTotal = stof(value);
         }
-        if (key == "MemFree") {
+        if (key == "MemFree:") {
           MemFree = stof(value);
         }
       }
@@ -111,20 +111,20 @@ long LinuxParser::ActiveJiffies(int pid) {
     if (filestream.is_open()) {
         std::getline(filestream, line);
         std::istringstream linestream(line);
+        std:: cout << "pid:" << pid << " " << line.size() << std::endl;
         int count = 0;
-        while (count++ != 13) linestream >> temp;
+        while (count++ != 12) linestream >> temp;
         linestream >> utime >> stime >> cutime >> cstime;
     }
-    long int activeJiffies{stol(utime) + stol(stime) + stol(cutime) + stol(cstime)};
-    return activeJiffies;
+    return (long)(stol(utime) + stol(stime) + stol(cutime) + stol(cstime));
 }
 
 // Done: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
   vector<string> val = CpuUtilization();
-  std::cout << "starting\n";
-  return (stol(val[CPUStates::kUser_]) + stol(val[CPUStates::kNice_]) + stol(val[CPUStates::kSystem_]) +
-    stol(val[CPUStates::kIRQ_]) + stol(val[CPUStates::kSoftIRQ_]) + stol(val[CPUStates::kSteal_]) + 
+  return (stol(val[CPUStates::kUser_]) + stol(val[CPUStates::kNice_]) +
+    stol(val[CPUStates::kSystem_]) + stol(val[CPUStates::kIRQ_]) +
+    stol(val[CPUStates::kSoftIRQ_]) + stol(val[CPUStates::kSteal_]) +
     stol(val[CPUStates::kGuest_]) + stol(val[CPUStates::kGuestNice_]));
 }
 
@@ -137,16 +137,17 @@ long LinuxParser::IdleJiffies() {
 // Done: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() {
   vector<string> temp;
-  string line, val, cpuStr;
+  string line, dummy;
   std::ifstream filestream(kProcDirectory + kStatFilename);
   if (filestream.is_open()) {
-    std::getline(filestream, line);
-    std::istringstream linestream(line);
-    linestream >> cpuStr;
-    if (cpuStr == "cpu") {
+    while (std::getline(filestream, line)){
       std::istringstream linestream(line);
-      while(linestream >> val) temp.push_back(val);
-      return temp;
+      while(linestream >> dummy){
+        if (dummy == "cpu") {
+          while(linestream >> dummy) temp.push_back(dummy);
+          return temp;
+        }
+      }
     }
   }
   return temp;
