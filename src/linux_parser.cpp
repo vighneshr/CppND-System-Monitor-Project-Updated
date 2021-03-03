@@ -73,16 +73,17 @@ float LinuxParser::MemoryUtilization() {
   string key, value, line;
   std::ifstream stream(kProcDirectory + kMeminfoFilename);
   if (stream.is_open()){
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      while (linestream >> key >> value){
-        if (key == "MemTotal:") {
-          MemTotal = stof(value);
-        }
-        if (key == "MemFree:") {
-          MemFree = stof(value);
-        }
-      }
+    std::getline(stream, line);
+    std::istringstream total_str(line);
+    total_str >> key >> value;
+    if (key == "MemTotal:") {
+      MemTotal = stoi(value);
+    }
+    std::getline(stream, line);
+    std::istringstream free_str(line);
+    free_str >> key >> value;
+    if (key == "MemFree:") {
+      MemFree = stoi(value);
     }
   }
   return (float)(MemTotal - MemFree)/MemTotal;
@@ -111,12 +112,12 @@ long LinuxParser::ActiveJiffies(int pid) {
     if (filestream.is_open()) {
         std::getline(filestream, line);
         std::istringstream linestream(line);
-        std:: cout << "pid:" << pid << " " << line.size() << std::endl;
         int count = 0;
         while (count++ != 12) linestream >> temp;
         linestream >> utime >> stime >> cutime >> cstime;
     }
-    return (long)(stol(utime) + stol(stime) + stol(cutime) + stol(cstime));
+    long activejiffies = stol(utime) + stol(stime) + stol(cutime) + stol(cstime);
+    return activejiffies;
 }
 
 // Done: Read and return the number of active jiffies for the system
@@ -204,7 +205,8 @@ string LinuxParser::Ram(int pid) {
       if (line.find("VmSize:") != string::npos) {
         std::istringstream linestream(line);
         linestream >> key >> val;
-        return val;
+        float ram = stoi(val)/1024;
+        return to_string(ram);
       }
     }
   }
